@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <title>Memes Creator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    #container {
+      width: 320px;
+      position: relative;
+      padding: 10px;
+      background-color: red;
+      border-radius: 10px;
+      box-shadow: 1px 1px 3px red;
+    }
+    canvas {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    img[src=''] {
+      visibility: hidden;
+    }
+    a, [type=file] {
+      display: none;
+    }
+    #background {
+      width: 300px;
+      height: 300px;
+      position: relative;
+      margin-bottom: 20px;
+    }
+    #background, .input-line {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .input-line {
+      width: 300px;
+      height: 30px;
+    }
+    p {
+      font: bold 30px Comic Sans MS, sans-serif;
+      color: white;
+      text-shadow: 1px 1px 1px black;
+    }
+    [type=text] {
+      padding: 5px;
+      border: none;
+      border-bottom: 2px solid white;
+      background-color: rgb(220, 50, 50);
+      color: white;
+      border-radius: 5px 5px 0 0;
+      width: 80%;
+    }
+    button, #file-button  {
+      background-color: red;
+      border: 2px groove white;
+      font-weight: bold;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      padding: 10px;
+      font: 16px calibri, sans-serif;
+      width: 100%;
+      display: inline-block;
+      text-align: center;
+    }
+    #input-text {
+      padding: 5px 0 5px 0;
+    }
+    .color-container {
+      width: 20px;
+      height: 20px;
+      overflow: hidden;
+      border-radius: 5px;
+      position: relative;
+      margin-left: 5px;
+      border: 2px groove white;
+    }
+    [type=color] {
+      outline: none;
+      border: none;
+      background: none;
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      cursor: pointer;
+    }
+    canvas, img, .color-container, button, #file-button {
+      box-shadow: 1px 1px 10px white inset;
+      border-radius: 5px;
+    }
+    button:active, #file-button:active, .color-container:active {
+      background-color: white;
+      color: red;
+      position: relative;
+      top: 2px;
+      left: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container">
+    <div id="background">
+      <p>Upload an image</p>
+      <img src="" width="300" height="300">
+    </div>
+    <canvas width="300" height="300"></canvas>
+    <input id="file-input" type="file" accept="image/*">
+    <label id="file-button" for="file-input">Upload</label>
+    <div id="input-text">
+      <div class="input-line">
+        <input id="upper-line" type="text" placeholder="Upper line">
+        <div class="color-container">
+          <input id="upper-line-fcolor" type="color" value="#ffffff">
+        </div>
+        <div class="color-container">
+          <input id="upper-line-scolor" type="color">
+        </div>
+      </div>
+    </div>
+    <div id="input-text">
+      <div class="input-line">
+        <input id="lower-line" type="text" placeholder="Lower line">
+        <div class="color-container">
+          <input id="lower-line-fcolor" type="color" value="#ffffff">
+        </div>
+        <div class="color-container">
+          <input id="lower-line-scolor" type="color">
+        </div>
+      </div>
+    </div>
+    <a href="" download="My_Meme.png"></a>
+    <button>Download</button>
+  </div>
+
+  <script>
+    var image = document.querySelector("img"),
+      uploadInput = document.querySelector("[type=file]"),
+      upperLineInput = document.querySelector("#upper-line"),
+      lowerLineInput = document.querySelector("#lower-line"),
+      upperLineFcolorInput = document.querySelector("#upper-line-fcolor"),
+      lowerLineFcolorInput = document.querySelector("#lower-line-fcolor"),
+      upperLineScolorInput = document.querySelector("#upper-line-scolor"),
+      lowerLineScolorInput = document.querySelector("#lower-line-scolor"),
+      downloadLink = document.querySelector("a"),
+      downloadButton = document.querySelector("button"),
+      canvas = document.querySelector("canvas"),
+      ctx = canvas.getContext("2d");
+
+      ctx.font = "36px Impact";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "white";
+
+    downloadButton.onclick = function() {
+      if(!image.alt) {
+        alert("Pls upload an image first")
+        return;
+      }else if(lowerLineInput.value || upperLineInput.value) {
+        ctx.drawImage(image, 0, 0, 300, 300);
+        handleTextInputs();
+        downloadLink.href = canvas.toDataURL();
+        downloadLink.click();
+        lowerLineInput.value = upperLineInput.value = "";
+        ctx.clearRect(0, 0, 300, 300);
+      }else {
+        alert("Pls fill one of the lines first");
+      }
+    }
+
+    uploadInput.onchange = function() {
+      var reader = new FileReader();
+
+      reader.onloadend = function() {
+        image.src = reader.result;
+        image.alt = "background";
+      };
+
+      reader.readAsDataURL(this.files[0]);
+    };
+
+    upperLineInput.oninput = lowerLineInput.oninput =
+      upperLineFcolorInput.onchange = upperLineScolorInput.onchange =
+        lowerLineFcolorInput.onchange = lowerLineScolorInput.onchange =
+          function() {
+            ctx.clearRect(0, 0, 300, 300);
+            handleTextInputs();
+         };
+
+    function handleTextInputs() {
+      ctx.fillStyle = upperLineFcolorInput.value;
+      ctx.strokeStyle = upperLineScolorInput.value;
+      ctx.strokeText(upperLineInput.value, 150, 40);
+      ctx.fillText(upperLineInput.value, 150, 40);
+      ctx.fillStyle = lowerLineFcolorInput.value;
+      ctx.strokeStyle = lowerLineScolorInput.value;
+      ctx.strokeText(lowerLineInput.value, 150, 260);
+      ctx.fillText(lowerLineInput.value, 150, 260);
+    }
+  </script>
+
+</body>
+</html>
